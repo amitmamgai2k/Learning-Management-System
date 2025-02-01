@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Home, BookOpen, Mail, Info, LogIn, UserPlus, LayoutDashboard, LogOut } from 'lucide-react';
+import { Menu, X, Home, BookOpen, Mail, Info, LogIn, User, LayoutDashboard, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -123,9 +123,9 @@ const HomeLayout = ({ children }) => {
                 </Link>
                 <Link
                   to="/signup"
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors w-full"
+                  className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors w-full"
                 >
-                  <UserPlus className="w-5 h-5" />
+                  <User className="w-5 h-5" />
                   <span>Sign Up</span>
                 </Link>
               </div>

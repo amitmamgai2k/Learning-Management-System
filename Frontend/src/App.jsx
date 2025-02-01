@@ -6,6 +6,9 @@ import HomePage from './pages/HomePage'
 import AboutPage from './pages/AboutPage'
 import Footer from './components/Footer'
 import NotFound from './pages/PageNotFound'
+import ContactPage from './pages/ContactPage'
+import UserSignup from './pages/UserAuthentication/UserSignup'
+import UserLogin from './pages/UserAuthentication/UserLogin'
 
 function App() {
 
@@ -19,6 +22,9 @@ function App() {
       <Route path="/" element={<HomePage/>} />
       <Route path="/about" element={<AboutPage/>} />
       <Route path="*" element={<NotFound/>} />
+      <Route path="/contact" element={<ContactPage/>} />
+      <Route path="/signup" element={<UserSignup/>} />
+      <Route path="/login" element={<UserLogin/>} />
      </Routes>
      <Footer/>
     </>
