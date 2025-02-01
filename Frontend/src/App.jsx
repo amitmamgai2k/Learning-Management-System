@@ -2,14 +2,19 @@
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
 
+import HomeLayout from './Layouts/HomeLayout'
+import HomePage from './pages/HomePage'
+
 function App() {
 
 
   return (
     <>
-    <div className='text-3xl bg-red-400'>Hello</div>
+
+
+
      <Routes>
-      <Route path="/" element={<h1>Home</h1>} />
+      <Route path="/" element={<HomePage/>} />
      </Routes>
     </>
   )
