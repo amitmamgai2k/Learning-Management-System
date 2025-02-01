@@ -121,13 +121,13 @@ const HomePage = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="bg-blue-600 text-white py-16">
+        <section className=" text-black py-16">
           <div className="max-w-4xl mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold mb-4">Ready to Start Learning?</h2>
             <p className="text-lg mb-8 opacity-90">
               Join thousands of students who are already learning and growing with us.
             </p>
-            <button className="bg-white text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+            <button className="bg-white border-2 text-blue-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors">
               Get Started Today
             </button>
           </div>

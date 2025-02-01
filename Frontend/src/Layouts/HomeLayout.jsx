@@ -61,7 +61,8 @@ const HomeLayout = ({ children }) => {
       )}
 
       {/* Menu Button */}
-      <div className="fixed top-0 left-0 right-0 h-16 bg-white shadow-sm z-30">
+      <div className="fixed  h-16 bg-white shadow-sm z-30 flex flex-row justify-end">
+
         <button
           onClick={toggleSidebar}
           className="absolute top-4 left-4 p-2 rounded-lg hover:bg-gray-100 z-50 transition-all duration-200"
