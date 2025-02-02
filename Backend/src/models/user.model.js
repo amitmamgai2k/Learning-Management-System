@@ -55,15 +55,7 @@ const userSchema = new Schema({
 
 // Encrypt Password
 
-userSchema.pre("save", async function(next){
-    if(!this.isModified("password")){
-         return next();
-    }
 
-
-this.password = await bcrypt.hash(this.password, 10)
-next()
-});
 userSchema.methods.generateAuthToken = async function(){
     const token = jwt.sign({id: this._id},process.env.JWT_SECRET,{expiresIn: '24h'});
     return token;

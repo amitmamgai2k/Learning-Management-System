@@ -2,8 +2,9 @@ import asyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import User from "../models/user.model.js";
-import  uploadOnCloudinary  from "../utils/cloudinary.js";
+import  {uploadOnCloudinary } from "../utils/cloudinary.js";
 import { validationResult } from "express-validator";
+import { log } from "console";
 
 
 const cookieOptions = {
@@ -11,64 +12,61 @@ const cookieOptions = {
     httpOnly: true,
     secure: true
 }
-const register = asyncHandler(async (req, res,next) => {
-    try{
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+const register = asyncHandler(async (req, res, next) => {
+    try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const { fullname, email, password, mobileNumber } = req.body;
+        if (!fullname || !email || !password || !mobileNumber) {
+            return next(new ApiError(400, "Please fill all the details", 400)); // ✅ Correct
+        }
+
+        const userExists = await User.findOne({
+            $or: [{ email: email }, { mobileNumber: mobileNumber }]
+        });
+
+        if (userExists) {
+            return next(new ApiError("User already exists", 400)); // ✅ Correct
+        }
+
+        const avatarLocalPath = req.file?.path;
+        console.log(avatarLocalPath, 'avatarLocalPath');
+
+        if (!avatarLocalPath) {
+            return next(new ApiError(400, "Avatar file is required")); // ✅ Correct
+        }
+
+        const hashPassword = await User.hashPassword(password);
+        const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+        const user = await User.create({
+            fullname,
+            email,
+            password: hashPassword,
+            avatar: avatar?.url,
+            mobileNumber,
+        });
+
+        if (!user) {
+            return next(new ApiError("User not created", 400)); // ✅ Correct
+        }
+
+        await user.save();
+        user.password = undefined;
+        const token = await user.generateAuthToken();
+        res.cookie('token', token, cookieOptions);
+
+        return res.status(201).json(new ApiResponse(200, user, "User registered Successfully")); // ✅ Correct
+    } catch (err) {
+        return next(new ApiError(400, err.message)); // ✅ Correct
     }
-    const { fullname, email, password,mobileNumber } = req.body;
-    if(!fullname || !email || !password || !mobileNumber){
-     throw next(new ApiError(400,"Please fill all the details",400))
-    }
-    const userExists = await User.findOne({
-        $or:[{email:email},{mobileNumber:mobileNumber}]
-    });
-    if(userExists){
-        throw next(new ApiError("User already exists",400));
-    }
-    const avatarLocalPath =req.file?.path
-    console.log(avatarLocalPath),'avatarLocalPath';
-
-    if (!avatarLocalPath) {
-        throw new ApiError(400, "Avatar file is required")
-    }
-    const hashPassword = await User.hashPassword(password);
-
-    const avatar = await uploadOnCloudinary(avatarLocalPath);
-    const user = await User.create({
-        fullname,
-        email,
-        password:hashPassword,
-        avatar:avatar?.url,
-        mobileNumber,
-
-    });
-
-if(!user){
-    throw next(new ApiError("User not created",400))
-}
-await user.save();
-user.password = undefined;
-const token = await user.generateAuthToken();
-res.cookie('token',token,cookieOptions);
-return res.status(201).json(
-    new ApiResponse(200, user, "User registered Successfully")
-)
-    }
-    catch(err){
-        throw next(new ApiError(400,err.message))
-    }
+});
 
 
-}
-
-
-
-
-);
-
-const login = asyncHandler(async (req, res) => {
+const login = asyncHandler(async (req, res,next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -78,6 +76,8 @@ const login = asyncHandler(async (req, res) => {
         if (!email || !password) {
           throw new ApiError(400, "Email and password are required");
         }
+        console.log(email,password);
+
         const user = await User.findOne({ email }).select("+password");
         if (!user) {
           throw new ApiError(400, "User not found");

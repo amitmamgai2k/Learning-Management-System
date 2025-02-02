@@ -3,6 +3,8 @@ import { Menu, X, Home, BookOpen, Mail, Info, LogIn, User, LayoutDashboard, LogO
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../Redux/Slices/AuthSlice';
+
 
 const HomeLayout = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,15 +18,14 @@ const HomeLayout = ({ children }) => {
     setIsOpen(!isOpen);
   };
 
-  const handleLogout = () => {
-    // Dispatch logout action
-    dispatch({ type: 'LOGOUT' });
-    // Navigate to home page
-    navigate('/');
-    // Close sidebar
-    setIsOpen(false);
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    const res = await dispatch(logout());
+    if (res?.payload?.success) navigate('/');
   };
-
+const getProfile = () => {
+   e.preventDefault();
+}
   // Define base menu items
   const baseMenuItems = [
     { title: 'Home', icon: Home, path: '/' },
@@ -87,7 +88,7 @@ const HomeLayout = ({ children }) => {
 
           {/* Logo/Brand */}
           <div className="p-6 border-b">
-            <h1 className="text-xl font-bold text-gray-800">Your Brand</h1>
+            <h1 className="text-xl font-bold text-gray-800">Learnly</h1>
           </div>
 
           {/* Navigation Links */}
@@ -131,9 +132,16 @@ const HomeLayout = ({ children }) => {
               </div>
             ) : (
               <div className="space-y-2">
+                 <button
+                  onClick={getProfile}
+                  className="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white hover:bg-red-700 rounded-lg transition-colors w-full"
+                >
+                  <User className="w-5 h-5" />
+                  <span>Profile</span>
+                </button>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg transition-colors w-full"
+                  className="flex items-center gap-2 px-4 py-2 bg-pink-600 text-white hover:bg-red-700 rounded-lg transition-colors w-full"
                 >
                   <LogOut className="w-5 h-5" />
                   <span>Logout</span>

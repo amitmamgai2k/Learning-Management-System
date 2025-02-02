@@ -13,33 +13,25 @@ function UserLogin() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-
-
     const [LoginData, setLoginData] = useState({
-
         email: "",
         password: "",
-
     });
 
     function handleUserInput(e) {
         const { name, value } = e.target;
-        setSignupData({
-            ...signupData,
-            [name]: value,
+        setLoginData({
+            ...LoginData,
+            [name]: value, // Update LoginData instead of signupData
         });
     }
 
-
     async function Login(event) {
         event.preventDefault();
-        if (!LoginData.email || !LoginData.password )  {
+        if (!LoginData.email || !LoginData.password) {
             toast.error("Please fill all the details");
             return;
         }
-
-        // checking name field length
-
 
         // checking email validation
         if (!isEmail(LoginData.email)) {
@@ -52,19 +44,13 @@ function UserLogin() {
             return;
         }
 
-
-
-
-         const response = await dispatch(login(LoginData));
-         if (response?.payload?.success) navigate("/");
+        const response = await dispatch(login(LoginData));
+        if (response?.payload?.success) navigate("/");
 
         setLoginData({
-
             email: "",
             password: "",
-
         });
-
     }
 
     return (
@@ -73,12 +59,9 @@ function UserLogin() {
                 <form
                     noValidate // it is stopping default html validation for toast
                     onSubmit={Login}
-                      className="bg-gray-800 flex flex-col justify-center gap-3 rounded-[40px] p-4 text-white w-96 shadow-[10px_10px_150px_gray]"
+                    className="bg-gray-800 flex flex-col justify-center gap-3 rounded-[40px] p-4 text-white w-96 shadow-[10px_10px_150px_gray]"
                 >
                     <h1 className="text-center text-2xl font-bold">Login Page</h1>
-
-
-
 
                     <div className="flex flex-col gap-1">
                         <label htmlFor="email" className="font-semibold">
@@ -119,9 +102,8 @@ function UserLogin() {
                     </button>
 
                     <p className="text-center">
-                        Don't have an account ?{" "}
+                        Don't have an account?{" "}
                         <Link to="/signup" className="link text-accent cursor-pointer">
-                            {" "}
                             Sign Up
                         </Link>
                     </p>
