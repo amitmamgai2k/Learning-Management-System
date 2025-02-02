@@ -9,6 +9,7 @@ import NotFound from './pages/PageNotFound'
 import ContactPage from './pages/ContactPage'
 import UserSignup from './pages/UserAuthentication/UserSignup'
 import UserLogin from './pages/UserAuthentication/UserLogin'
+import CourseList from './pages/CoursesPage/CourseList'
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
       <Route path="/contact" element={<ContactPage/>} />
       <Route path="/signup" element={<UserSignup/>} />
       <Route path="/login" element={<UserLogin/>} />
+      <Route path = '/courses' element={<CourseList/>} />
      </Routes>
      <Footer/>
     </>

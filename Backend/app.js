@@ -6,6 +6,7 @@ import cors from "cors";
 import morgan from "morgan";
 import connectToDB from "./src/db/db.js";
 import userRoutes from "./src/routes/user.routes.js";
+import courseRoutes from "./src/routes/course.routes.js";
 import errorMiddleware from "./src/middlewares/error.middleware.js";
 const app = express();
 dotenv.config();
@@ -20,6 +21,7 @@ app.route("/").get((req, res) => {
 })
 
 app.use('/users',userRoutes);
+app.use('/courses',courseRoutes);
 app.use(errorMiddleware);
 app.all("*", (req, res) => {
     res.status(404).send("Page Not Found");
