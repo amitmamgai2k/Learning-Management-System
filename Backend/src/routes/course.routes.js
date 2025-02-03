@@ -1,7 +1,13 @@
 import {Router} from "express";
-import {getAllCourses,getLecturesByCourseId} from "../controllers/course.controller.js";
-import isLoggedIn from "../middlewares/auth.middleware.js";
+import {createCourse, getAllCourses,getLecturesByCourseId, updateCourse,deleteCourse,addLectures,deleteLectures} from "../controllers/course.controller.js";
+import { isLoggedIn ,authorizedRoles } from "../middlewares/auth.middleware.js";
+import upload from "../middlewares/multer.middleware.js";
 const router = Router();
 router.get('/',getAllCourses);
-router.get('/:id',isLoggedIn,getLecturesByCourseId);
+ router.get('/getLectures',isLoggedIn,getLecturesByCourseId);
+router.get('/create-course',upload.single('thumbnail'),isLoggedIn, authorizedRoles('ADMIN'),createCourse);
+router.get('/update-course',upload.single('thumbnail'),isLoggedIn,authorizedRoles('ADMIN'),updateCourse);
+router.get('/delete-course',isLoggedIn,authorizedRoles('ADMIN'),deleteCourse);
+router.post('/add-lectures',upload.single('lectureThumbnail'),isLoggedIn,authorizedRoles('ADMIN'),addLectures);
+router.post('/delete-lectures',isLoggedIn,authorizedRoles('ADMIN'),deleteLectures);
 export default router;

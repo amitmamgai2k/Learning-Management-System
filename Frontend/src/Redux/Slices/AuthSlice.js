@@ -22,24 +22,26 @@ export const createAccount = createAsyncThunk(
 );
 
 
-export const login  = createAsyncThunk('auth/login', async (data) => {
+export const login = createAsyncThunk('auth/login', async (data) => {
     try {
-        const response =  axiosInstance.post('/users/login', data);
-        toast.promise(response, {
+        const response = await axiosInstance.post('/users/login', data); // ✅ Await here
+
+        console.log(response.data, 'data of data'); // Now this will show the correct response
+
+        await toast.promise(Promise.resolve(response), {  // ✅ Ensure the promise is awaited properly
             loading: 'Logging In...',
-            success: (data) => {
-                return data?.data?.message;
-            },
+            success: (res) => res?.data?.message, // ✅ Access res.data.message correctly
             error: (error) => `Error: ${error.message}`,
         });
 
-        return (await response).data;
+        return response.data; // ✅ Now returning resolved response data
 
     } catch (error) {
-        toast.error(error?.response?.data?.message);
-
+        toast.error(error?.response?.data?.message || 'Something went wrong');
+        throw error; // ✅ Ensure the error is properly thrown for rejection handling
     }
 });
+
 export const logout = createAsyncThunk('auth/logout', async () => {
     try {
         const response = await axiosInstance.get('/user/logout');
@@ -77,12 +79,14 @@ const authSlice = createSlice({
             state.role = "";
             state.data = {};
         }).addCase(login.fulfilled, (state,action) => {
+            console.log(action?.payload?.data,'payload');
+
             localStorage.setItem('isLoggedIn', true);
-            localStorage.setItem('role', action?.payload?.user?.role);
-            localStorage.setItem('data', JSON.stringify(action?.payload?.user));
+            localStorage.setItem('role', action?.payload?.data?.role);
+            localStorage.setItem('data', JSON.stringify(action?.payload?.data));
             state.isLoggedIn = true;
-            state.role = action?.payload?.user?.role;
-            state.data = action?.payload?.user;
+            state.role = action?.payload?.data?.role;
+            state.data = action?.payload?.data;
 
         })
 

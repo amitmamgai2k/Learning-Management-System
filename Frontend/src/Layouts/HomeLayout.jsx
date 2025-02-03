@@ -36,14 +36,14 @@ const getProfile = () => {
 
   // Add role-specific menu items
   const menuItems = [...baseMenuItems];
-  if (isLoggedIn && role === "admin") {
+  if (isLoggedIn && role === "ADMIN") {
     menuItems.push({
       title: 'Admin Dashboard',
       icon: LayoutDashboard,
       path: '/admin/dashboard'
     });
   }
-  if (isLoggedIn && role === "user") {
+  if (isLoggedIn && role === "USER") {
     menuItems.push({
       title: 'My Courses',
       icon: BookOpen,
