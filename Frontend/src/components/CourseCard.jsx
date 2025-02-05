@@ -7,9 +7,9 @@ function CourseCard({ course }) {
     const navigate = useNavigate();
 
     return (
-        <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300" onClick={() => navigate(`/courses/${title}`)}>
+        <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300"  onClick={() => navigate(`/courses/description/${course.title}`,{state:{...course}})}>
             {/* Course Image */}
-            <div className="relative">
+            <div className="relative" >
                 <img
                     src={course.thumbnail}
                     alt={course.title}
