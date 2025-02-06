@@ -2,10 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import HomeLayout from "../../Layouts/HomeLayout";
 import { Clock, BookOpen, Users, Star, Award } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 function CourseDescription() {
     const location = useLocation();
     const [course, setCourse] = useState(null);
+    const role = useSelector(state => state?.auth?.role);
 
     useEffect(() => {
         if (location.state) {
@@ -103,12 +105,21 @@ function CourseDescription() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    <button className="w-full py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
-                                        Enroll Now
-                                    </button>
-                                    <button className="w-full py-4 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all">
-                                        Add to Wishlist
-                                    </button>
+                                    {role === 'ADMIN' || course.subscription?.status === "Active" ? (
+                                        <button className="w-full py-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                                            Watch Lectures
+                                        </button>
+                                    ) : (
+                                        <button className="w-full py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                                            Enroll Now
+                                        </button>
+                                    )}
+
+                                    {role !== 'ADMIN' && course.subscription?.status !== "Active" && (
+                                        <button className="w-full py-4 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all">
+                                            Add to Wishlist
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>

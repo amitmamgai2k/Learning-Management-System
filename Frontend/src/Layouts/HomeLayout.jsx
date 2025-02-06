@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, Home, BookOpen, Mail, Info, LogIn, User, LayoutDashboard, LogOut } from 'lucide-react';
+import { Menu, X, Home, BookOpen, Mail, Info, LogIn, User, LayoutDashboard, LogOut,MonitorUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,8 +23,9 @@ const HomeLayout = ({ children }) => {
     const res = await dispatch(logout());
     if (res?.payload?.success) navigate('/');
   };
-const getProfile = () => {
+const getProfile = (e) => {
    e.preventDefault();
+   navigate('/profile');
 }
   // Define base menu items
   const baseMenuItems = [
@@ -41,6 +42,11 @@ const getProfile = () => {
       title: 'Admin Dashboard',
       icon: LayoutDashboard,
       path: '/admin/dashboard'
+
+    },{
+      title: 'Create Course',
+      icon: MonitorUp ,
+      path: '/course/create'
     });
   }
   if (isLoggedIn && role === "USER") {
