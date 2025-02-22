@@ -153,23 +153,39 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
   const deleteLectures = asyncHandler(async (req, res) => {
     const errors = validationResult(req);
-    if(!errors.isEmpty()){
-      return res.status(400).json({errors:errors.array()});
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
     }
+
     try {
+        const { courseId, lectureTitle } = req.body;
 
-      const {courseId} = req.body;
-      const course = await Course.findById(courseId);
-      if(!course){
-        throw new ApiError(400,"Course not found");
-      }
+        // Find the course by ID
+        const course = await Course.findById(courseId);
+        if (!course) {
+            throw new ApiError(400, "Course not found");
+        }
 
-      await course.save();
-      return res.status(200).json(new ApiResponse(200,course,"Lectures deleted successfully"));
+        // Find the lecture index by title
+        const lectureIndex = course.lectures.findIndex(lecture => lecture.title === lectureTitle);
+        if (lectureIndex === -1) {
+            throw new ApiError(400, "Lecture not found");
+        }
 
+        // Remove the lecture from the array
+        course.lectures.splice(lectureIndex, 1);
+
+        // Update the number of lectures
+        course.numbersoflectures = course.lectures.length;
+
+        // Save the updated course
+        await course.save();
+
+        return res.status(200).json(new ApiResponse(200, course, "Lecture deleted successfully"));
     } catch (error) {
-
+        return res.status(500).json(new ApiResponse(500, null, error.message));
     }
-  });
+});
+
 
   export { getAllCourses, getLecturesByCourseId, createCourse , updateCourse,deleteCourse,addLectures,deleteLectures};

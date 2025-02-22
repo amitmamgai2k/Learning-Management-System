@@ -32,14 +32,14 @@ function App() {
       <Route path="/signup" element={<UserSignup/>} />
       <Route path="/login" element={<UserLogin/>} />
       <Route path = '/courses' element={<CourseList/>} />
+      <Route path = '/courses/displayLectures' element={<CourseList/>} />
       <Route path = '/access-denied' element={<Denied/>} />
       <Route path = '/courses/description/:title' element={<CourseDescription/>} />
       <Route element={<RequireAuth allowedRoles={['ADMIN']} />} >
       <Route path ='/course/create' element ={<CreateCourse/>}/>
+      </Route>
       <Route element ={<RequireAuth allowedRoles={['ADMIN','USER']} />}>
       <Route path = '/profile' element={<UserProfile/>}/>
-      </Route>
-
 
       </Route>
 

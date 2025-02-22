@@ -1,6 +1,7 @@
 import ApiError from "../utils/ApiError.js";
 import jwt from "jsonwebtoken";
-
+import User from "../models/user.model.js";
+import asyncHandler from "../utils/asyncHandler.js";
 const isLoggedIn = async(req, res, next) => {
 const {token} = req.cookies;
 
@@ -41,5 +42,13 @@ const authorizedRoles = (...roles) => async (req, res, next) => {
         next(error);
     }
 };
+const authorizedSubscriber = asyncHandler(async (req, res, next) => {
+    const id = req.user.id;
+    const user = await User.findById(id);
+    if (user.role !== "ADMIN" && user.subscription.status !== "active") {
+        return next(new ApiError("please subscribe to access this route!", 400));
+    }
+    next();
+});
 
-export { isLoggedIn, authorizedRoles };
+export { isLoggedIn, authorizedRoles, authorizedSubscriber };

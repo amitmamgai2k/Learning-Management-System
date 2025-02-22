@@ -2,7 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import HomeLayout from '../../Layouts/HomeLayout';
-import { Camera, Mail, Phone, Calendar, Shield, Edit, Users, BookOpen, TrendingUp, Settings } from 'lucide-react';
+import { Camera, Mail, Phone, Calendar, Shield, Edit, Users, BookOpen, TrendingUp, Settings,Award } from 'lucide-react';
 
 function UserProfile() {
     const dispatch = useDispatch();

@@ -43,6 +43,10 @@ const userSchema = new Schema({
         select:false
 
     },
+    subscription:{
+        id:String,
+        status:String
+    },
     refreshToken:{
         type:String
     },
