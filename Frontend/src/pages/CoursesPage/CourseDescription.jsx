@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import HomeLayout from "../../Layouts/HomeLayout";
 import { Clock, BookOpen, Users, Star, Award } from 'lucide-react';
 import { useSelector } from 'react-redux';
 
 function CourseDescription() {
+    const navigate = useNavigate();
     const location = useLocation();
     const [course, setCourse] = useState(null);
     const role = useSelector(state => state?.auth?.role);
@@ -110,7 +111,7 @@ function CourseDescription() {
                                             Watch Lectures
                                         </button>
                                     ) : (
-                                        <button className="w-full py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                                        <button onClick={ () => navigate('/checkout')} className="w-full py-4 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
                                             Enroll Now
                                         </button>
                                     )}

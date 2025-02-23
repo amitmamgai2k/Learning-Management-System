@@ -4,45 +4,72 @@ import asyncHandler from "../utils/asyncHandler.js";
 
 import Payment from "../models/payment.model.js";
 import User from "../models/user.model.js";
-import { razorpay } from "../../server.js";
+import  razorpay  from "../utils/razorpay.js";
 
 import ApiError from "../utils/ApiError.js";
 
 
+
+
 export const buySubscription = asyncHandler(async (req, res, next) => {
+    try {
+        const { id } = req.user;
+        console.log("User ID:", id);
 
-    const { id } = req.user;
-    const user = await User.findById(id);
+        if (!id) {
+            return next(new ApiError("Unauthorized, please login", 401));
+        }
 
-    if (!user) {
-        return next(new ApiError("Unauthorized, please login"));
+        // Find user
+        const user = await User.findById(id);
+        console.log("User Details:", user);
+
+        if (!user) {
+            return next(new ApiError("User not found", 404));
+        }
+
+        // Check user role
+        if (user.role === "ADMIN") {
+            return next(new ApiError("Admin cannot purchase a subscription", 400));
+        }
+
+        // Ensure RAZORPAY_PLAN_ID is set
+        if (!process.env.RAZORPAY_PLAN_ID) {
+            return next(new ApiError("Subscription plan is not configured", 500));
+        }
+
+
+
+        // Create subscription on Razorpay
+        const subscription = await razorpay.subscriptions.create({
+            plan_id: process.env.RAZORPAY_PLAN_ID, // Unique plan ID
+            customer_notify: 1, // Notify customer
+            total_count: 12, // Charge monthly for 1 year
+        });
+
+        if (!subscription || !subscription.id) {
+            return next(new ApiError("Failed to create subscription", 500));
+        }
+
+        // Update user subscription details
+        user.subscription = {
+            id: subscription.id,
+            status: subscription.status,
+        };
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Subscribed successfully",
+            subscription_id: subscription.id,
+        });
+    } catch (error) {
+        console.error("Error in buySubscription:", error);
+        return next(new ApiError("Internal server error", 500));
     }
-
-    // Checking the user role
-    if (user.role === "ADMIN") {
-        return next(new ApiError("Admin cannot purchase a subscription", 400));
-    }
-
-    // Creating a subscription using razorpay that we imported from the server
-    const subscription = await razorpay.subscriptions.create({
-        plan_id: process.env.RAZORPAY_PLAN_ID, // The unique plan ID
-        customer_notify: 1, // To notify the customer
-        total_count: 12, // 12 means it will charge every month for a 1-year sub.
-    });
-
-    // Adding the ID and the status to the user account
-    user.subscription.id = subscription.id;
-    user.subscription.status = subscription.status;
-
-    // Saving the user object
-    await user.save();
-
-    res.status(200).json({
-        success: true,
-        message: "subscribed successfully",
-        subscription_id: subscription.id,
-    });
 });
+
 
 
 export const verifySubscription = asyncHandler(async (req, res, next) => {
@@ -56,10 +83,6 @@ export const verifySubscription = asyncHandler(async (req, res, next) => {
     }
     const subscriptionId = user.subscription.id;
 
-    // Generating a signature with SHA256 for verification purposes
-    // Here the subscriptionId should be the one which we saved in the DB
-    // razorpay_payment_id is from the frontend and there should be a '|' character between this and subscriptionId
-    // At the end convert it to Hex value
     const generatedSignature = crypto
         .createHmac("sha256", process.env.RAZORPAY_SECRET)
         .update(`${razorpay_payment_id}|${subscriptionId}`)

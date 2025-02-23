@@ -6,12 +6,12 @@ import {
     cancelSubscription,
     getRazorpayApiKey,
     verifySubscription,
-} from "../controllers/paymentController.js";
+} from "../controllers/payment.controller.js";
 
 const router = Router();
 
 router.route("/razorpay-key").get(isLoggedIn, getRazorpayApiKey);
-router.route("/subscribe").post(isLoggedIn, buySubscription);
+router.post('/subscribe',isLoggedIn, buySubscription);
 router.route("/verify").post(isLoggedIn, verifySubscription);
 router.route("/unsubscribe").post(isLoggedIn, authorizedSubscriber, cancelSubscription);
 router.route("/").get(isLoggedIn, authorizedRoles("ADMIN"), allPayments);
