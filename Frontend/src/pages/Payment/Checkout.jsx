@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { IndianRupee } from 'lucide-react';
 import { useDispatch, useSelector } from "react-redux";
@@ -6,13 +6,13 @@ import { useNavigate } from "react-router-dom";
 import HomeLayout from "../../Layouts/HomeLayout";
 import { getRazorPayId, purchaseCourseBundle, verifyUserPayment } from "../../Redux/Slices/RazorpaySlice";
 
-
 function Checkout() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const razorpayKey = useSelector((state) => state?.razorpay?.key);
     const subscription_id = useSelector((state) => state?.razorpay?.subscription_id);
     const userData = useSelector((state) => state?.auth?.data);
+    const [isLoading, setIsLoading] = useState(false);
 
     const paymentDetails = {
         razorpay_payment_id: "",
@@ -22,10 +22,21 @@ function Checkout() {
 
     async function handleSubscription(e) {
         e.preventDefault();
-        if (!razorpayKey || !subscription_id) {
-            toast.error("Something went wrong");
+        setIsLoading(true);
+
+        // Check if Razorpay is loaded and keys are available
+        if (!window.Razorpay) {
+            toast.error("Payment gateway not loaded. Please refresh the page.");
+            setIsLoading(false);
             return;
         }
+
+        if (!razorpayKey || !subscription_id) {
+            toast.error("Payment details not loaded. Please try again.");
+            setIsLoading(false);
+            return;
+        }
+
         const options = {
             key: razorpayKey,
             subscription_id: subscription_id,
@@ -34,29 +45,108 @@ function Checkout() {
             theme: {
                 color: "#F37254",
             },
-            prefill: { email: userData.email, name: userData.fullName },
-            handler: async function (response) {
-                paymentDetails.razorpay_payment_id = response.razorpay_payment_id;
-                paymentDetails.razorpay_signature = response.razorpay_signature;
-                paymentDetails.razorpay_subscription_id = response.razorpay_subscription_id;
-
-                toast.success("Payment successful");
-
-                const res =  dispatch(verifyUserPayment(paymentDetails));
-                res?.payload?.success ? navigate("/checkout/success") : navigate("/checkout/fail");
+            prefill: {
+                email: userData?.email || "",
+                name: userData?.fullName || "",
+                contact: userData?.phoneNumber || ""
             },
+            handler: function (response) {
+                try {
+                    // Store payment details
+                    paymentDetails.razorpay_payment_id = response.razorpay_payment_id;
+                    paymentDetails.razorpay_signature = response.razorpay_signature;
+                    paymentDetails.razorpay_subscription_id = response.razorpay_subscription_id;
+
+                    toast.success("Payment successful");
+
+                    // Verify payment
+                    dispatch(verifyUserPayment(paymentDetails))
+                        .then((res) => {
+                            if (res.payload?.success) {
+                                navigate("/checkout/success");
+                            } else {
+                                toast.error("Payment verification failed");
+                                navigate("/checkout/fail");
+                            }
+                        })
+                        .catch((err) => {
+                            console.error("Payment verification error:", err);
+                            toast.error("Payment verification failed");
+                            navigate("/checkout/fail");
+                        })
+                        .finally(() => {
+                            setIsLoading(false);
+                        });
+                } catch (error) {
+                    console.error("Payment handler error:", error);
+                    toast.error("Error processing payment");
+                    setIsLoading(false);
+                    navigate("/checkout/fail");
+                }
+            },
+            modal: {
+                ondismiss: function() {
+                    setIsLoading(false);
+                    toast.error("Payment cancelled");
+                },
+                escape: true,
+                backdropclose: false
+            },
+            notes: {
+                user_id: userData?.id || ""
+            }
         };
-        const paymentObject = new window.Razorpay(options);
-        paymentObject.open();
+
+        try {
+            const paymentObject = new window.Razorpay(options);
+            console.log('paymentObject', paymentObject);
+
+
+            // Handle payment failures
+            paymentObject.on('payment.failed', function (response) {
+                console.error("Payment failed:", response.error);
+                toast.error(`Payment failed: ${response.error.description}`);
+                setIsLoading(false);
+                navigate("/checkout/fail");
+            });
+
+            paymentObject.open();
+        } catch (error) {
+            console.error("Razorpay initialization error:", error);
+            toast.error("Failed to open payment gateway");
+            setIsLoading(false);
+        }
     }
 
     async function load() {
-         dispatch(getRazorPayId());
-         dispatch(purchaseCourseBundle());
+        try {
+            // Load Razorpay key and purchase details in parallel
+            await Promise.all([
+                dispatch(getRazorPayId()),
+                dispatch(purchaseCourseBundle())
+            ]);
+        } catch (error) {
+            console.error("Error loading payment details:", error);
+            toast.error("Failed to load payment details");
+        }
     }
 
     useEffect(() => {
         load();
+
+        // Add Razorpay script if not already loaded
+        if (!window.Razorpay) {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.async = true;
+            script.onload = () => console.log("Razorpay SDK loaded");
+            script.onerror = () => toast.error("Failed to load payment gateway");
+            document.body.appendChild(script);
+
+            return () => {
+                document.body.removeChild(script);
+            };
+        }
     }, []);
 
     return (
@@ -64,7 +154,7 @@ function Checkout() {
             <div className="min-h-[90vh] flex items-center justify-center p-4 bg-gray-50">
                 <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-purple-600 to-blue-600  px-6 py-8">
+                    <div className="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-8">
                         <h1 className="text-3xl font-bold text-white text-center">
                             Buy Course
                         </h1>
@@ -127,9 +217,10 @@ function Checkout() {
                         {/* Button */}
                         <button
                             onClick={handleSubscription}
-                            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-[1.02]"
+                            disabled={isLoading}
+                            className={`w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-4 rounded-xl text-lg font-semibold transition-all duration-300 transform hover:scale-[1.02] ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
-                            Subscribe Now
+                            {isLoading ? "Processing..." : "Subscribe Now"}
                         </button>
                     </div>
                 </div>
