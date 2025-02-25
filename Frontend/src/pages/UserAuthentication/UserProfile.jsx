@@ -1,169 +1,128 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
-import HomeLayout from '../../Layouts/HomeLayout';
-import { Camera, Mail, Phone, Calendar, Shield, Edit, Users, BookOpen, TrendingUp, Settings,Award } from 'lucide-react';
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import HomeLayout from "../../Layouts/HomeLayout";
+import { getUserData } from "../../Redux/Slices/AuthSlice";
+import { cancelCourseBundle } from "../../Redux/Slices/RazorpaySlice";
 
-function UserProfile() {
+function Profile() {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const userData = useSelector((state) => state?.auth?.data);
-    const isAdmin = userData?.role === "ADMIN";
 
+    // Format dates without using date-fns
     const formatDate = (dateString) => {
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString(undefined, options);
+        if (!dateString) return "N/A";
+        try {
+            const date = new Date(dateString);
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return date.toLocaleDateString('en-US', options);
+        } catch (error) {
+            return dateString;
+        }
     };
 
-    const userStats = isAdmin ? {
-        totalUsers: 150,
-        totalCourses: 25,
-        totalRevenue: "₹45,000",
-        activeStudents: 89
-    } : {
-        coursesEnrolled: 3,
-        completedCourses: 1,
-        certificatesEarned: 1,
-        totalProgress: "65%"
-    };
+    async function handleCancellation() {
+        toast("Initiating cancellation");
+        await dispatch(cancelCourseBundle());
+        await dispatch(getUserData());
+        toast.success("Cancellation completed!");
+        navigate("/");
+    }
 
     return (
         <HomeLayout>
-            <div className="min-h-screen bg-gray-50 py-12 px-4">
-                <div className="max-w-6xl mx-auto">
-                    {/* Main Profile Card */}
-                    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-                        {/* Cover Image */}
-                        <div className="h-40 bg-gradient-to-r from-blue-500 to-blue-600"></div>
-
-                        {/* Profile Info */}
-                        <div className="relative px-6 pb-6">
-                            {/* Avatar */}
-                            <div className="relative -mt-20 mb-6 flex justify-between items-end px-4">
-                                <div className="relative">
-                                    <img
-                                        src={userData.avatar}
-                                        alt={userData.fullname}
-                                        className="w-40 h-40 rounded-full border-4 border-white shadow-lg object-cover"
-                                    />
-                                    <button className="absolute bottom-2 right-2 p-2 bg-blue-500 rounded-full text-white hover:bg-blue-600 transition-colors">
-                                        <Camera className="w-5 h-5" />
-                                    </button>
-                                </div>
-                                <div className="mb-4">
-                                    <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-medium ${
-                                        isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-                                    }`}>
-                                        <Shield className="w-4 h-4 mr-2" />
-                                        {userData.role}
-                                    </span>
-                                </div>
+            <div className="flex items-center justify-center h-screen overflow-hidden relative  bg-white">
+                <div className="w-full max-w-md">
+                    {/* Main card */}
+                    <div className=" flex flex-col gap-6 rounded-xl bg-white p-8 text-gray-800 shadow-lg border border-gray-200">
+                        {/* Header section with avatar */}
+                        <div className="flex flex-col items-center">
+                            <div className="relative mb-6">
+                                <img
+                                    src={userData?.avatar?.secure_url || "http://res.cloudinary.com/ddjo2iypg/image/upload/v1738473073/ynbl7gmfhrplujgxloxf.png"}
+                                    className="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg ring-2 ring-gray-200"
+                                    alt={userData?.fullName}
+                                />
+                                {userData?.subscription?.status === "active" && (
+                                    <div className="absolute bottom-1 right-1 bg-green-500 h-5 w-5 rounded-full border-2 border-white z-10 flex items-center justify-center">
+                                        <div className="h-2 w-2 rounded-full bg-green-300 animate-pulse"></div>
+                                    </div>
+                                )}
                             </div>
+                            <h3 className="text-2xl font-bold text-center capitalize text-gray-800 mb-1">{userData?.fullName || userData?.fullname}</h3>
+                            <span className="px-3 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded-full mb-2">{userData?.role}</span>
+                        </div>
 
-                            {/* Basic Info */}
-                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                                <div>
-                                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{userData.fullname}</h1>
-                                    <div className="flex items-center gap-4 text-gray-600">
-                                        <span className="flex items-center">
-                                            <Mail className="w-4 h-4 mr-2" />
-                                            {userData.email}
-                                        </span>
-                                        <span className="flex items-center">
-                                            <Phone className="w-4 h-4 mr-2" />
-                                            +91 {userData.mobileNumber}
-                                        </span>
+                        {/* Information box */}
+                        <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                                    <p className="text-gray-600 font-medium">Email</p>
+                                    <p className="font-medium text-gray-800">{userData?.email}</p>
+                                </div>
+
+                                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                                    <p className="text-gray-600 font-medium">Mobile</p>
+                                    <p className="font-medium text-gray-800">{userData?.mobileNumber || "Not provided"}</p>
+                                </div>
+
+                                <div className="flex justify-between items-center pb-3 border-b border-gray-200">
+                                    <p className="text-gray-600 font-medium">Member Since</p>
+                                    <p className="font-medium text-gray-800">{formatDate(userData?.createdAt)}</p>
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                    <p className="text-gray-600 font-medium">Subscription</p>
+                                    <div className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2 ${
+                                        userData?.subscription?.status === "active"
+                                        ? "bg-green-100 text-green-700 border border-green-200"
+                                        : "bg-red-100 text-red-700 border border-red-200"
+                                    }`}>
+                                        {userData?.subscription?.status === "active" && (
+                                            <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                                        )}
+                                        {userData?.subscription?.status || "Inactive"}
                                     </div>
                                 </div>
-                                {isAdmin && (
-                                    <button className="mt-4 md:mt-0 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2">
-                                        <Settings className="w-4 h-4" />
-                                        Admin Dashboard
-                                    </button>
+
+                                {userData?.subscription?.id && (
+                                    <div className="flex justify-between items-center pt-3 border-t border-gray-200 text-xs">
+                                        <p className="text-gray-600 font-medium">Subscription ID</p>
+                                        <p className="font-medium text-gray-500">{userData.subscription.id}</p>
+                                    </div>
                                 )}
-                            </div>
-
-                            {/* Stats Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                                {isAdmin ? (
-                                    <>
-                                        <div className="bg-gray-50 p-4 rounded-xl text-center">
-                                            <Users className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                                            <p className="text-2xl font-bold text-gray-900">{userStats.totalUsers}</p>
-                                            <p className="text-sm text-gray-600">Total Users</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-xl text-center">
-                                            <BookOpen className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                                            <p className="text-2xl font-bold text-gray-900">{userStats.totalCourses}</p>
-                                            <p className="text-sm text-gray-600">Total Courses</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-xl text-center">
-                                            <TrendingUp className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                                            <p className="text-2xl font-bold text-gray-900">{userStats.totalRevenue}</p>
-                                            <p className="text-sm text-gray-600">Total Revenue</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-xl text-center">
-                                            <Users className="w-6 h-6 text-purple-500 mx-auto mb-2" />
-                                            <p className="text-2xl font-bold text-gray-900">{userStats.activeStudents}</p>
-                                            <p className="text-sm text-gray-600">Active Students</p>
-                                        </div>
-                                    </>
-                                ) : (
-                                    <>
-                                        <div className="bg-gray-50 p-4 rounded-xl text-center">
-                                            <BookOpen className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                                            <p className="text-2xl font-bold text-gray-900">{userStats.coursesEnrolled}</p>
-                                            <p className="text-sm text-gray-600">Courses Enrolled</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-xl text-center">
-                                            <Shield className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                                            <p className="text-2xl font-bold text-gray-900">{userStats.completedCourses}</p>
-                                            <p className="text-sm text-gray-600">Completed Courses</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-xl text-center">
-                                            <Award className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                                            <p className="text-2xl font-bold text-gray-900">{userStats.certificatesEarned}</p>
-                                            <p className="text-sm text-gray-600">Certificates Earned</p>
-                                        </div>
-                                        <div className="bg-gray-50 p-4 rounded-xl text-center">
-                                            <TrendingUp className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-                                            <p className="text-2xl font-bold text-gray-900">{userStats.totalProgress}</p>
-                                            <p className="text-sm text-gray-600">Total Progress</p>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <button className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                    <Edit className="w-4 h-4" />
-                                    Edit Profile
-                                </button>
-                                <button className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
-                                    Change Password
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Activity Section */}
-                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-white rounded-xl shadow-md p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                                {isAdmin ? "Recent System Activity" : "Learning Activity"}
-                            </h3>
-                            <div className="text-center text-gray-500 py-8">
-                                No recent activity to show
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-xl shadow-md p-6">
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                                {isAdmin ? "System Statistics" : "Learning Progress"}
-                            </h3>
-                            <div className="text-center text-gray-500 py-8">
-                                No data to display
-                            </div>
+                        {/* Action buttons */}
+                        <div className="grid grid-cols-2 gap-4 mt-2">
+                            <Link
+                                to="/changepassword"
+                                className="bg-gray-100 hover:bg-gray-200 transition-all ease-in-out duration-300 rounded-lg font-medium py-3 px-4 cursor-pointer text-center flex items-center justify-center border border-gray-200 text-gray-700"
+                            >
+                                <button>Change Password</button>
+                            </Link>
+                            <Link
+                                to="/user/editprofile"
+                                className="bg-blue-600 hover:bg-blue-700 transition-all ease-in-out duration-300 rounded-lg font-medium py-3 px-4 cursor-pointer text-center flex items-center justify-center shadow-md text-white"
+                            >
+                                <button>Edit Profile</button>
+                            </Link>
+                        </div>
+
+                        {/* Cancel subscription button */}
+                        {(userData?.subscription?.status === "active" || userData?.subscription?.status === "created") && (
+                            <button
+                                onClick={handleCancellation}
+                                className="mt-2 w-full bg-red-600 hover:bg-red-700 transition-all ease-in-out duration-300 rounded-lg font-semibold py-3 cursor-pointer text-center shadow-md text-white"
+                            >
+                                Cancel Subscription
+                            </button>
+                        )}
+
+                        <div className="text-center text-xs text-gray-500 mt-4">
+                            Last updated: {formatDate(userData?.updatedAt)}
                         </div>
                     </div>
                 </div>
@@ -172,4 +131,4 @@ function UserProfile() {
     );
 }
 
-export default UserProfile;
+export default Profile;
