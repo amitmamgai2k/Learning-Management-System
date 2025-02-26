@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import HomeLayout from '../../Layouts/HomeLayout'
-import { deleteCourseLectures, getAllLectures } from '../../Redux/Slices/LectureSlice'
+import { deleteCourseLectures , getAllLectures } from '../../Redux/Slices/LectureSlice'
 
 function Displaylectures() {
   const navigate = useNavigate();
@@ -46,7 +46,7 @@ function Displaylectures() {
       <div className=" overflow-auto scrollbar-hide min-h-screen">
         <div className="container mx-auto px-4 py-8 max-w-7xl">
           {/* Course Header */}
-          <div className="mb-10 text-center">
+          <div className="mb-10 text-center flex-1 overflow-y-auto">
             <h1 className="text-3xl md:text-4xl font-bold text-black mb-3">
               {state?.state?.title}
             </h1>
@@ -56,7 +56,7 @@ function Displaylectures() {
           </div>
 
           {lectures && lectures.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-1 ">
 
               <div className="lg:col-span-2 bg-gradient-to-b from-gray-700 to-gray-900 rounded-xl overflow-hidden shadow-2xl border border-gray-700">
                 <div className="aspect-video w-full bg-black">
@@ -109,7 +109,7 @@ function Displaylectures() {
                   </div>
                   <div className="h-[2px] bg-gradient-to-r from-violet-600 to-violet-300 mb-4"></div>
 
-                  <div className="overflow-y-auto flex-grow">
+                  <div className="overflow-y-auto flex-grow max-h-[60vh]">
                     {lectures.map((lecture, idx) => (
                       <div
                         key={lecture._id}
@@ -145,7 +145,7 @@ function Displaylectures() {
                                 </p>
                               )}
                             </div>
-
+                          {/* delete */}
                             {role === "ADMIN" && (
                               <button
                                 onClick={(e) => {

@@ -31,7 +31,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
         if (!course) {
             return res.status(404).json({ error: 'Course not found' });
         }
-         console.log('couese',course.lectures)
+
         res.status(200).json({
             success: true,
             message: 'Lectures fetched successfully',
@@ -131,33 +131,33 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+
     try {
-      const {courseId, title, description} = req.body;
-      if(!courseId || !title || !description) {
+      const { courseId, title, description, lectureThumbnail } = req.body;
+
+      if (!courseId || !title || !description || !lectureThumbnail) {
         throw new ApiError(400, "All fields are required");
       }
-      const course = await Course.find(courseId);
+
+      const course = await Course.findById(courseId);
+
       if (!course) {
-        throw new ApiError(400, "Course not found");
-      }
-      const lectureLocalPath = req.file.path;
-      if (!lectureLocalPath) {
-        throw new ApiError(400, "Lecture file is required");
-      }
-      const lecture = await uploadOnCloudinary(lectureLocalPath);
-      if (!lecture) {
-        throw new ApiError(400, "Lecture not uploaded");
+        throw new ApiError(404, "Course not found");
       }
 
-      course.lectures.push({title,description,lectureThumbnail:lecture.url});
+      if (!course.lectures) {
+        course.lectures = [];
+      }
+
+      course.lectures.push({ title, description, lectureThumbnail });
       course.numbersoflectures = course.lectures.length;
+
       await course.save();
 
       return res.status(200).json(new ApiResponse(200, course, "Lecture added successfully"));
     } catch (error) {
       throw new ApiError(400, error.message);
     }
-
   });
 
   const deleteLectures = asyncHandler(async (req, res) => {
@@ -167,16 +167,23 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
     }
 
     try {
-        const { courseId, lectureTitle } = req.body;
+        const { courseId, lectureId } = req.body;
 
-        // Find the course by ID
+
+        if(!courseId || !lectureId){
+            throw new ApiError(400,"All fields are required");
+        }
         const course = await Course.findById(courseId);
         if (!course) {
             throw new ApiError(400, "Course not found");
         }
 
+
+      console.log('LectureId',lectureId);
+
         // Find the lecture index by title
-        const lectureIndex = course.lectures.findIndex(lecture => lecture.title === lectureTitle);
+        const lectureIndex = course.lectures.findIndex(lecture => lecture._id.toString() === lectureId);
+
         if (lectureIndex === -1) {
             throw new ApiError(400, "Lecture not found");
         }

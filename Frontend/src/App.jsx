@@ -19,6 +19,7 @@ import Checkout from './pages/Payment/Checkout'
 import PaymentSuccess from './pages/Payment/CheckoutSuccess'
 import PaymentFail from './pages/Payment/CheckoutFailure'
 import Displaylectures from './pages/Dashboard/Displaylectures'
+import AddLecturePage from './pages/Dashboard/AddLectures'
 function App() {
 
 
@@ -36,6 +37,7 @@ function App() {
       <Route path="/login" element={<UserLogin/>} />
       <Route path = '/courses' element={<CourseList/>} />
       <Route path = '/courses/displayLectures' element={< Displaylectures/>} />
+      <Route path = '/course/addlecture' element ={< AddLecturePage/>} />
       <Route path = '/access-denied' element={<Denied/>} />
       <Route path = '/courses/description/:title' element={<CourseDescription/>} />
       <Route element={<RequireAuth allowedRoles={['ADMIN']} />} >

@@ -23,37 +23,43 @@ export const getAllLectures = createAsyncThunk('/lecture/get', async (cid) => {
         throw error; // Ensure createAsyncThunk properly catches the error
     }
 });
-export const addCourseLectures = createAsyncThunk('/lecture/add', async (data) => {
+export const addCourseLectures = createAsyncThunk('/add-lectures', async (data) => {
+    console.log('data', data);
+
+    const { title, description, courseId, videoUrl: lectureThumbnail } = data;
+
     try {
-        const formData = new FormData();
-        formData.append('title', data?.title);
-        formData.append('description', data?.description);
-        formData.append('thumbnail', data?.thumbnail);
-        formData.append('lecture', data?.lecture);
-        const response =await axiosInstance.post('/add-lectures', formData);
-        toast.promise(response, // Pass the promise
+        // Wrap the request in toast.promise()
+        const response = await toast.promise(
+            axiosInstance.post('/courses/add-lectures', { title, description, lectureThumbnail, courseId }),
             {
                 loading: 'Adding Lectures...',
                 success: 'Lectures added Successfully',
                 error: 'Failed to Add Lectures'
-            })
+            }
+        );
 
         return response.data;
     } catch (error) {
-        toast.error(error?.response?.data?.message);
-        throw error; // Ensure createAsyncThunk properly catches the error
+        toast.error(error?.response?.data?.message || 'An error occurred');
+        throw error;
     }
 });
-export const deleteCourseLectures = createAsyncThunk('/lecture/delete', async (data) => {
-    try {;
 
-        const response =await axiosInstance.delete('/delete-lectures');
-        toast.promise(response, // Pass the promise
+export const deleteCourseLectures = createAsyncThunk('/lecture/delete', async (data) => {
+    try {
+        const lectureId = data.lectureId;
+        const courseId = data.courseId;
+
+        const response =await toast.promise(
+            axiosInstance.post('/courses/delete-lectures',{lectureId,courseId}),
+
             {
                 loading: 'Deleting Lectures...',
                 success: 'Lectures deleted Successfully',
                 error: 'Failed to delete Lectures'
-            })
+            }
+        );
 
         return response.data;
     } catch (error) {

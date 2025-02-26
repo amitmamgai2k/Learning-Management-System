@@ -9,6 +9,6 @@ router.get('/',getAllCourses);
 router.post('/create-course',upload.single('thumbnail'),isLoggedIn,authorizedRoles('ADMIN'),  createCourse);
 router.get('/update-course',upload.single('thumbnail'),isLoggedIn,authorizedRoles('ADMIN'),updateCourse);
 router.get('/delete-course',isLoggedIn,authorizedRoles('ADMIN'),deleteCourse);
-router.post('/add-lectures',upload.single('lectureThumbnail'),isLoggedIn,authorizedRoles('ADMIN'),addLectures);
+router.post('/add-lectures',isLoggedIn,authorizedRoles('ADMIN'),addLectures);
 router.post('/delete-lectures',isLoggedIn,authorizedRoles('ADMIN'),deleteLectures);
 export default router;
