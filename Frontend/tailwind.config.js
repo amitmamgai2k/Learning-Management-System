@@ -10,6 +10,10 @@ export default {
 
   	}
   },
-  plugins: [require('daisyui'), require("@tailwindcss/line-clamp")],
+  plugins: [
+    require('daisyui'),
+    require('@tailwindcss/line-clamp'),
+    require('tailwind-scrollbar-hide') // Correct placement
+  ],
 }
 

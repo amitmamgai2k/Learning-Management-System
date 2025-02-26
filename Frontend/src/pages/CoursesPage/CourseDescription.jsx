@@ -106,8 +106,8 @@ function CourseDescription() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    {role === 'ADMIN' || course.subscription?.status === "Active" ? (
-                                        <button className="w-full py-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                                    {role === 'ADMIN' || course.subscription?.status === "active" ? (
+                                        <button onClick={()=>navigate('/courses/displayLectures',{state:{...location}})} className="w-full py-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
                                             Watch Lectures
                                         </button>
                                     ) : (
@@ -116,7 +116,7 @@ function CourseDescription() {
                                         </button>
                                     )}
 
-                                    {role !== 'ADMIN' && course.subscription?.status !== "Active" && (
+                                    {role !== 'ADMIN' && course.subscription?.status !== "active" && (
                                         <button className="w-full py-4 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-all">
                                             Add to Wishlist
                                         </button>

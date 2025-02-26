@@ -58,7 +58,7 @@ const getProfile = (e) => {
   }
 
   return (
-    <div className="relative min-h-screen bg-gray-50">
+    <div className="relative min-h-screen m-0 p-0 bg-gray-50">
       {/* Overlay */}
       {isOpen && (
         <div

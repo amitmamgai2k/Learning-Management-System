@@ -19,23 +19,32 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
     }
   });
 
-  const getLecturesByCourseId = asyncHandler(async (req, res,next) => {
+  const getLecturesByCourseId = asyncHandler(async (req, res, next) => {
     try {
-        const {id} = req.body;
-      const course = await Course.find({_id:id});
-      if (!course) {
-        return res.status(404).json({ error: 'Course not found' });
-      }
-      res.status(200).json({
-        success: true,
-        message: 'Lectures fetched successfully',
-        lectures: course.lectures,
-      });
+
+        const { cid } = req.body;
+        console.log('cide',cid);
+
+
+        const course = await Course.findById(cid);
+
+        if (!course) {
+            return res.status(404).json({ error: 'Course not found' });
+        }
+         console.log('couese',course.lectures)
+        res.status(200).json({
+            success: true,
+            message: 'Lectures fetched successfully',
+            lectures: course.lectures, // Assuming lectures are stored in the course document
+
+
+        });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+        console.error(error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-  });
+});
+
   const createCourse = asyncHandler(async (req, res,next) => {
     const erros = validationResult(req);
     if (!erros.isEmpty()) {

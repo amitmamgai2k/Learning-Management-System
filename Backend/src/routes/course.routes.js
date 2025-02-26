@@ -4,7 +4,8 @@ import { isLoggedIn ,authorizedRoles } from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/multer.middleware.js";
 const router = Router();
 router.get('/',getAllCourses);
- router.get('/getLectures',isLoggedIn,getLecturesByCourseId);
+ router.post('/getLectures', isLoggedIn, getLecturesByCourseId);
+
 router.post('/create-course',upload.single('thumbnail'),isLoggedIn,authorizedRoles('ADMIN'),  createCourse);
 router.get('/update-course',upload.single('thumbnail'),isLoggedIn,authorizedRoles('ADMIN'),updateCourse);
 router.get('/delete-course',isLoggedIn,authorizedRoles('ADMIN'),deleteCourse);
