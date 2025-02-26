@@ -8,6 +8,7 @@ import userRoutes from "./src/routes/user.routes.js";
 import courseRoutes from "./src/routes/course.routes.js";
 import paymentRoutes from "./src/routes/payment.route.js";
 import errorMiddleware from "./src/middlewares/error.middleware.js";
+import adminRoutes from "./src/routes/AdminRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -28,6 +29,7 @@ app.get("/", (req, res) => {
 app.use("/users", userRoutes);
 app.use("/courses", courseRoutes);
 app.use("/payments", paymentRoutes);
+app.use("/admin",adminRoutes);
 app.use(errorMiddleware);
 
 app.all("*", (req, res) => {

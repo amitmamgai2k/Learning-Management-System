@@ -4,10 +4,16 @@ import { useDispatch, useSelector } from 'react-redux'
 import HomeLayout from '../../Layouts/HomeLayout'
 import { deleteCourseLectures , getAllLectures } from '../../Redux/Slices/LectureSlice'
 
+
 function Displaylectures() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { state } = useLocation();
+  console.log('state',state);
+  const courseId = state?._id;
+  console.log('courseId',courseId);
+
+
 
   const { lectures } = useSelector((state) => state.lectures);
   const { role } = useSelector((state) => state.auth);
@@ -31,15 +37,20 @@ function Displaylectures() {
     return url;
   };
 
-  async function handleLectureDelete(courseId, lectureId) {
+  async function handleLectureDelete(cid, lectureId) {
     await dispatch(deleteCourseLectures({ courseId, lectureId }));
-    await dispatch(getAllLectures(courseId));
+    await dispatch(getAllLectures(cid));
   }
 
   useEffect(() => {
     if (!state) navigate('/courses');
-    dispatch(getAllLectures(state.state._id));
-  }, []);
+
+    if (courseId) {
+      dispatch(getAllLectures(courseId));
+    } else if (state?.state?._id) {
+      dispatch(getAllLectures(state.state._id));
+    }
+  }, [state, courseId]); // Add these as dependencies
 
   return (
     <HomeLayout>
@@ -150,7 +161,7 @@ function Displaylectures() {
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleLectureDelete(state.state._id, lecture._id);
+                                  handleLectureDelete(state._id, lecture._id);
                                 }}
                                 className="text-red-400 hover:text-red-500 bg-gray-800 hover:bg-gray-700 p-1.5 rounded-md text-sm transition-colors"
                                 title="Delete lecture"
